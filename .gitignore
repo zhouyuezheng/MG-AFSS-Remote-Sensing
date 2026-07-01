@@ -1,0 +1,28 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local datasets, checkpoints, and experiment outputs
+dataset/
+datasets/
+weights/
+checkpoints/
+experiments/
+runs/
+ultralytics_runtime/
+
+# Large model artifacts
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp

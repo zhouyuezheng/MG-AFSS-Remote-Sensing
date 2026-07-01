@@ -1,0 +1,16 @@
+# Python package requirements for the MG-AFSS release candidate.
+# Install PyTorch separately for your CUDA platform. The manuscript experiments
+# used PyTorch 2.5.1+cu121 and CUDA 12.1.
+
+numpy>=1.26
+pandas>=1.5
+PyYAML>=6.0
+opencv-python>=4.8
+Pillow>=9.0
+scipy>=1.10
+matplotlib>=3.6
+seaborn>=0.13
+tqdm>=4.66
+psutil>=5.9
+ultralytics-thop>=2.0
+pytest>=8.0

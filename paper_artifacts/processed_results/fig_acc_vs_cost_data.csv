@@ -1,0 +1,10 @@
+block_short,method,map50,map5095,time_ratio
+E1 NWPU scratch,AFSS,0.7878,0.4577,0.69
+E1 NWPU scratch,MG-AFSS,0.8142,0.4896,0.867
+E1 NWPU scratch,Standard training,0.8161,0.4893,1.0
+E3 NWPU pretrained,AFSS,0.94239,0.64181,0.6120436104148906
+E3 NWPU pretrained,MG-AFSS,0.95854,0.64128,0.55692856279532
+E3 NWPU pretrained,Standard training,0.95243,0.63476,1.0
+E3 NWPU scratch 200ep,AFSS,0.8977,0.5631,0.531
+E3 NWPU scratch 200ep,MG-AFSS,0.8997,0.5762,0.82
+E3 NWPU scratch 200ep,Standard training,0.8947,0.5773,1.0
