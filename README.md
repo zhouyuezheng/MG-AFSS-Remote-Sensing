@@ -20,6 +20,7 @@ This package supports the manuscript:
 - Pretrained or trained model weights.
 - Full experiment output folders.
 - Paper figures and processed numerical results.
+- Generated logs and qualitative detection examples.
 - Local development archives and exploratory runs.
 - A full Ultralytics source tree.
 

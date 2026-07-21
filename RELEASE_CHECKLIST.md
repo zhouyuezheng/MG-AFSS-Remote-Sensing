@@ -23,6 +23,7 @@ This checklist records what was included, excluded, and validated before prepari
 | Trained checkpoints and pretrained weights | Large files and potential license constraints |
 | Full `experiments/` folders | Local paths, logs, and exploratory run history |
 | Paper figures and processed numerical results | Withheld while the manuscript is under review |
+| Generated logs and qualitative detection examples | Not needed for the public code package |
 | Full Ultralytics fork | Release candidate provides only the patch files |
 | Qualitative detection manifests | Depend on local third-party images and local checkpoint paths |
 | Project archives and temporary files | Not needed for reproduction |
