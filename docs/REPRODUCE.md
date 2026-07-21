@@ -84,16 +84,6 @@ Compile summaries with:
 python tools/collect_results_from_summary.py
 ```
 
-## 6. Generate Example Paper Figure
-
-The release candidate includes processed aggregate data for the introductory accuracy-vs-cost figure:
-
-```bash
-python paper_artifacts/figure_scripts/generate_accuracy_vs_cost.py
-```
-
-The script reads `paper_artifacts/processed_results/fig_acc_vs_cost_data.csv` and writes figure files into `paper_artifacts/figure_scripts/`.
-
 ## Notes
 
 - The public package uses `mg_afss` as the method name. Some generated JSON fields retain `v3_*` names because the development experiments used that historical internal label.

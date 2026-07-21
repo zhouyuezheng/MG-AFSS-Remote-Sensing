@@ -15,10 +15,25 @@ checkpoints/
 experiments/
 runs/
 ultralytics_runtime/
+paper_artifacts/
+
+# Generated run records and qualitative outputs
+*.log
+**/results.csv
+**/summary.json
+**/afss_stats.json
+**/v3_log.json
+**/config.json
+**/command.txt
+predictions/
+detection_examples/
+qualitative_examples/
 
 # Large model artifacts
 *.pt
 *.pth
+*.ckpt
+*.safetensors
 *.onnx
 *.engine
 
