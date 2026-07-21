@@ -492,6 +492,15 @@ class V3Phase:
     ACTIVE = 3
 
 
+def _is_v3_fit_due(phase: int, validation_count: int) -> bool:
+    """Return whether the fixed state-aware maturity fit is due."""
+    if phase == V3Phase.ACTIVE:
+        return False
+    if phase == V3Phase.PROBING:
+        return True
+    return validation_count % 2 == 0
+
+
 def make_v3_trainer_cls(args: argparse.Namespace, nc: int):
     configure_import_paths()
     from ultralytics.utils import DEFAULT_CFG
@@ -523,6 +532,8 @@ def make_v3_trainer_cls(args: argparse.Namespace, nc: int):
             self._v3_a_hat: float | None = None
             self._v3_mu_hat: float = 0.0
             self._v3_history: deque[tuple[int, float]] = deque(maxlen=200)
+            self._v3_validation_count = 0
+            self._v3_fit_count = 0
             self.add_callback("on_fit_epoch_end", self._v3_on_fit_epoch_end)
 
         @staticmethod
@@ -585,9 +596,11 @@ def make_v3_trainer_cls(args: argparse.Namespace, nc: int):
                 return None, None
 
         def _estimate_maturity(self, epoch: int, map50: float) -> float:
-            self._v3_history.append((epoch, map50))
             a_hat, tau_hat = self._fit_curve()
             if tau_hat is None or tau_hat <= 0:
+                self._v3_a_hat = None
+                self._v3_tau_hat = None
+                self._v3_mu_hat = 0.0
                 return 0.0
             self._v3_a_hat = a_hat
             self._v3_tau_hat = tau_hat
@@ -606,7 +619,42 @@ def make_v3_trainer_cls(args: argparse.Namespace, nc: int):
             map50 = self._current_map50()
             if map50 is None:
                 return
+
+            # Detector validation continues after activation, but the maturity
+            # controller is terminal and performs no further curve fitting.
+            if self._v3_phase == V3Phase.ACTIVE:
+                return
+
+            # Retain every pre-activation validation observation in the
+            # cumulative history, including silent checks where fitting is skipped.
+            self._v3_history.append((epoch, map50))
+            self._v3_validation_count += 1
+
+            fit_due = _is_v3_fit_due(self._v3_phase, self._v3_validation_count)
+            history_ready = len(self._v3_history) >= fit_min_points
+            if not history_ready or not fit_due:
+                self._v3_log.append(
+                    {
+                        "epoch": epoch,
+                        "map50": map50,
+                        "mu_hat": None,
+                        "tau_hat": None,
+                        "a_hat": None,
+                        "phase": self._v3_phase,
+                        "policy": args.v3_trigger_policy,
+                        "fit_mode": "cumulative",
+                        "fit_points": len(self._v3_history),
+                        "validation_count": self._v3_validation_count,
+                        "fit_performed": False,
+                        "fit_skip_reason": (
+                            "insufficient_history" if not history_ready else "silent_alternating_check"
+                        ),
+                    }
+                )
+                return
+
             mu = self._estimate_maturity(epoch, map50)
+            self._v3_fit_count += 1
             entry = {
                 "epoch": epoch,
                 "map50": map50,
@@ -617,6 +665,8 @@ def make_v3_trainer_cls(args: argparse.Namespace, nc: int):
                 "policy": args.v3_trigger_policy,
                 "fit_mode": "cumulative",
                 "fit_points": len(self._v3_history),
+                "validation_count": self._v3_validation_count,
+                "fit_performed": True,
             }
             self._v3_log.append(entry)
 
@@ -989,12 +1039,16 @@ def main() -> int:
                 "policy": args.v3_trigger_policy,
                 "fit_mode": "cumulative",
                 "fit_min_points": args.v3_fit_min_points,
+                "fit_schedule": "silent_alternating__probing_every_validation__active_off",
+                "validation_count": getattr(trainer_obj, "_v3_validation_count", 0),
+                "fit_count": getattr(trainer_obj, "_v3_fit_count", 0),
                 "safe_guard": is_mg_afss_safe_method(args.method),
                 "nc": data_cfg.get("nc"),
             }
             write_json(actual_run_dir / "v3_log.json", v3_payload)
             summary["v3_trigger_epoch"] = v3_payload["trigger_epoch"]
             summary["phase2_epoch"] = v3_payload["phase2_epoch"]
+            summary["v3_fit_count"] = v3_payload["fit_count"]
 
         if error_info:
             summary.update(error_info)
